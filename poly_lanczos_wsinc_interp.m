@@ -163,7 +163,7 @@ for idx_phs = num_phases:-1:1
         wind_val                   = sinc(x_coord ./ lanczos_order);
         fir_poly(idx_phs, idx_tap) = sinc_val * wind_val;
     end
-    % Normalise mag-response
+    % Normalise imp-response
     sum_mag                 = sum(fir_poly(idx_phs, :));
     fir_poly(idx_phs, :)   /= sum_mag;
     % Round coefficients to nearest fixed-point value
