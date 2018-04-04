@@ -4,7 +4,7 @@
 
 % Design 1D interpolation filter for SD video (Rec 601)
 %
-% Provides a few options fo rspecification of desired filter charachteristics
+% Provides a few options for specification of desired filter charachteristics
 %
 %
 % Real video signals captured using pre-sampling anti-alias filter
@@ -21,9 +21,6 @@
 %
 %
 % NB: not specifying passband ripple
-%
-%
-% TO DO: use firls() to find hand-optimised filter, and compare performance
 
 clear all
 close all
@@ -43,21 +40,6 @@ intrp_ratio        = 4;
 %signed_coeff_wid   = 9; % Altera multipliers used efficiently with 9b IPs
 signed_coeff_wid   = 18; % Altera multipliers used fully with 18b IPs
 
-
-
-
-% PART 1
-% Design a filter which, after up-sampling, attenuates images sufficiently
-% for given lanczos_order and intrp_ratio
-%
-% Specify Rec601 presampling filter mask
-f_samp_orig        = 27000000;
-f_presamp_40dB     =  8000000;
-% Anti-imaging filter transition band specified @ lower edge of 1st image 
-f_trans_beg        = (f_samp_orig * 0.25) / f_samp_orig;
-f_trans_end        = (f_samp_orig - f_presamp_40dB) / f_samp_orig;
-
-%
 % Specify required attenuation. Build up from abse-spec
 % Spec image power @end of transition band (worst-case folding here)
 %
@@ -74,15 +56,24 @@ atten_trans_end_dB = atten_trans_end_dB + 3;
 atten_trans_end_dB = atten_trans_end_dB + log10(intrp_ratio-1);
 
 
+% Load Rec601 specs
+spec_rec601
 
-% PART 2
+
+% PART 1
 % Generate 1D windowed sinc filter (Lanczos window), over-sampled for upscaling
+%
+% Filter should, after up-sampling, attenuate images sufficiently
+% for given lanczos_order and intrp_ratio
 % 
 % Find highest filter Fcutoff for desired attenuation from f_trans_end to PI
 %     sinc_pband_scale: sinc argument scale-factor. 
 %                       changes Fcutoff of sinc-filter (1 = all-pass)
 %
 %
+
+
+
 for sinc_pband_scale = 1.0:-0.001: 0.01
 
   %printf("Check relative atten at sinc_pband_scale = %f\n", sinc_pband_scale)
@@ -141,7 +132,7 @@ periodogram(wsinc_func')
 
 
 
-% PART 3
+% PART 2
 % Generate polyphase coefficients for Lanczos anti-imaging filter
 % Make simple odd-order FIR, which captures central lobe,
 % and the extra lobes on *both* sides.
@@ -166,7 +157,7 @@ for idx_phs = num_phases:-1:1
         % that's because in convoution, impulse-response is LR flipped
         phs_offset                 = (idx_phs - num_phases - 1) / num_phases;
         x_coord                    = (-1 * lanczos_order) + (idx_tap-1) + phs_offset;
-        sinc_val                   = sinc(x_coord .* sinc_pband_scale);
+        sinc_val                   = sinc_pband_scale * sinc(x_coord .* sinc_pband_scale);
         % Lanczos window uses a dilated central lobe to weight the sinc function,
         % weights decreasing as move away from x=0
         wind_val                   = sinc(x_coord ./ lanczos_order);
@@ -196,63 +187,19 @@ for phase = 1 : num_phases
     periodogram(fir_poly(phase, :)');
 end
 
-
-
-
-
-
-% PART 4
-% Demonstrate scaling with square-wave input
-
-ip_len = 32;
-ip_sig = [ones(1,ip_len/4), zeros(1,ip_len/4), ones(1,ip_len/4), zeros(1,ip_len/4)];
-
-
-% Calculate output of each phase
-% Plot input signal, and results of simple filtering (sanity check)
-
-figure(figure_num); figure_num = figure_num + 1;
-
-fig_xaxis        = [0:(ip_len-1)];
-
-subplot(((num_phases/2)+1),2,1);
-plot(fig_xaxis, ip_sig);
-axis([0, (ip_len-1), -0.5, 1.5]);
-
-phase_op_len     = ip_len + (num_taps-1);
-op_phase         = zeros(num_phases, phase_op_len);
-
-for phase = 1:num_phases
-    op_phase(phase, :) = conv(ip_sig, fir_poly(phase, :));
-    subplot(((num_phases/2)+1),2,phase+2);
-    plot(fig_xaxis, op_phase(phase, 1:ip_len));
-    axis([0, (ip_len-1), -0.5, 1.5]);
-end
-
-
-% Create upscaled output, by commutating between phases
-op_upsc          = zeros(1, num_phases * ip_len);
-
-idx_phase = 1;
-idx_samp  = 1;
-for idx_upsc = 1: length(op_upsc)
-    op_upsc(idx_upsc) = op_phase(idx_phase, idx_samp);
-    if (idx_phase == num_phases)
-        idx_phase         = 1;
-        idx_samp          = idx_samp + 1;
-    else
-        idx_phase         = idx_phase + 1;
+% Save coefficients in file
+fid = fopen('poly_lanczos_wsinc_coeffs.txt', 'w');
+fprintf(fid, "%d\n", num_phases);
+fprintf(fid, "%d\n", num_taps);
+for idx_phase = 1:size(fir_poly)(1)
+    for idx_tap = 1:size(fir_poly)(2)
+        fprintf(fid, "%f\n", fir_poly(idx_phase, idx_tap));
     end
 end
+fclose(fid);
 
-% Plot the input and output signals. NB group-delay and x-axis scale
-figure(figure_num); figure_num = figure_num + 1;
 
-subplot(2,1,1);
-plt_xaxis        = [0:(ip_len-1)];
-plot(plt_xaxis, ip_sig);
-axis([0, (ip_len-1), -0.5, 1.5]);
 
-subplot(2,1,2);
-plt_xaxis        = [0:(length(op_upsc)-1)];
-plot(plt_xaxis, op_upsc);
+
+% PART 3: test
+test_filter

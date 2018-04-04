@@ -29,7 +29,7 @@ figure_num = 1;
 
 % Specify filter
 %
-%    order_on_2:       number of taps each side of central taps
+%    order_on_2:       number of taps each side of central tap
 %                      higher order yields higher performance, at greater cost
 %    intrp_ratio:      desired interpolation (scaling) factor
 %                      equals number of sub-filter phases
@@ -58,83 +58,70 @@ atten_trans_end_dB = atten_trans_end_dB + log10(intrp_ratio-1);
 
 
 
+% Load Rec601 specs
+spec_rec601
+
 
 
 % PART 1
-% Design a filter which, after up-sampling, attenuates images sufficiently
-% for given lanczos_order and intrp_ratio
-%
-% Specify Rec601 presampling filter mask
-f_samp_orig        = 27000000;
-f_presamp_40dB     =  8000000;
-% Anti-imaging filter transition band specified @ lower edge of 1st image 
-f_trans_beg        = (f_samp_orig * 0.25) / f_samp_orig;
-f_trans_end        = (f_samp_orig - f_presamp_40dB) / f_samp_orig;
+% Generate 1D least-squares approx filter, over-sampled for upscaling
+
+num_taps        = (2*order_on_2) + 1;
+num_phases      = intrp_ratio;
+
+BW_old_Fnyq     = f_presamp_40dB/(f_samp_orig/2)
+BW_new_Fnyq     = BW_old_Fnyq/num_phases
+
+
+% Split Nyquist band into bands, forming freq and mag vectors
+f_vect = [];
+m_vect = [];
+for idx_phase = 1 : (num_phases+1)
+    mid_f   = (idx_phase-1) * 1/num_phases
+    lower_f = mid_f - (BW_new_Fnyq/2);
+    upper_f = mid_f + (BW_new_Fnyq/2);    
+    f_vect = [f_vect, max(0, lower_f), min(1, upper_f)];
+    if (idx_phase == 1)
+        m_vect = [m_vect, 1, 1];
+    else
+        m_vect = [m_vect, 0, 0];
+    end
+end
+
+
+% Relative weighting for each band
+%w=[1 4000000 2000000 200000 200000 100000 100000 100000 ];
+
+ls_filt = firls(num_phases*num_taps,f_vect,m_vect);
+%ls_filt = (ls_filt+fliplr(ls_filt))/2;
+ 
+% Plot filter and its PSD
+figure(figure_num); figure_num = figure_num + 1;
+subplot(2,1,1);
+stem(ls_filt);
+title("Least squares approx filter");
+subplot(2,1,2);
+periodogram(ls_filt')
 
 
 
 
 % PART 2
-% Generate 1D least-squares approx filter, over-sampled for upscaling
-
-
- 
-% Plot sinc, window, windowed-sinc and its PSD
-figure(figure_num); figure_num = figure_num + 1;
-subplot(2,2,1);
-plot(idx_sinc, sinc_func);
-title("sinc");
-subplot(2,2,2);
-plot(idx_sinc, wind_func);
-title("window");
-subplot(2,2,3)
-plot(idx_sinc, wsinc_func);
-title("windowed sinc");
-subplot(2,2,4);
-periodogram(wsinc_func')
-
-
-
-% PART 3
-% Generate polyphase coefficients for Lanczos anti-imaging filter
-% Make simple odd-order FIR, which captures central lobe,
-% and the extra lobes on *both* sides.
-% Odd order filter co-sites output with the input samples
-num_taps        = (2*order_on_2) + 1;
-num_phases      = intrp_ratio;
+% Generate polyphase coefficients for LS approx anti-imaging filter
 
 fir_poly        = zeros(num_phases, num_taps);
 
-% Generate impulse response for each of the polyphase filters
-% NB: Octave sinc() function is the normalised sinc: sin(pi*x)/(pi*x)
-% Integer arguments for sinc return 0 except at x=0, as each lobe occupies an
-% interval of 1 (assuming passband is 100% of Nyquist band)
+size(ls_filt)
+size(fir_poly(1, :))
+myVar = downsample(ls_filt, num_phases, 0)(1:num_taps)'
+size(myVar)
 
-% Could use function downsample() here
 
-for idx_phs = num_phases:-1:1
-    for idx_tap = 1:num_taps
-        % Choose x co-ordinate for sub-filter in question
-        % Step over x-axis with increments of 1 (single lobe)
-        % Each subsequent phase starts a fraction of a lobe to the left,
-        % that's because in convoution, impulse-response is LR flipped
-        phs_offset                 = (idx_phs - num_phases - 1) / num_phases;
-        x_coord                    = (-1 * lanczos_order) + (idx_tap-1) + phs_offset;
-        sinc_val                   = sinc_pband_scale * sinc(x_coord .* sinc_pband_scale);
-        % Lanczos window uses a dilated central lobe to weight the sinc function,
-        % weights decreasing as move away from x=0
-        wind_val                   = sinc(x_coord ./ lanczos_order);
-        fir_poly(idx_phs, idx_tap) = sinc_val * wind_val;
-    end
-    % Normalise mag-response
-    sum_mag                 = sum(fir_poly(idx_phs, :));
-    fir_poly(idx_phs, :)   /= sum_mag;
-    % Round coefficients to nearest fixed-point value
-    % For range of +/-1, need 2 integer bits
-    scale_fact              = 2 ^ (signed_coeff_wid - 2);
-    scaled_taps             = fir_poly(idx_phs, :) .* scale_fact;
-    fir_poly(idx_phs, :)    = round(scaled_taps)   ./ (scale_fact);
+for idx_phase = 1:num_phases
+    phase_imp_resp         = downsample(ls_filt, num_phases, idx_phase-1);
+    fir_poly(idx_phase, :) = phase_imp_resp(1:num_taps)';
 end
+
 
 % Plot PSD of each phase. Check that all have low-pass spectrum!
 figure(figure_num); figure_num = figure_num + 1;
