@@ -59,7 +59,7 @@ spec_rec601
 
 for sinc_pband_scale = 1.0:-0.001: 0.01
 
-  %printf("Check relative atten at sinc_pband_scale = %f\n", sinc_pband_scale)
+  %printf('Check relative atten at sinc_pband_scale = %f\n', sinc_pband_scale)
 
   % Generate normalised sinc filter. Sinc good as filter must be symmetric,
   % as linear phase preserves edges in images
@@ -85,12 +85,12 @@ for sinc_pband_scale = 1.0:-0.001: 0.01
   
       % The spec is met if difference between DC attenuation, and
       % attenuation at f_trans_end/intrp_ratio is > required attenuation 
-      printf("Check relative atten at new Fnyq * %f\n", (f_trans_end/intrp_ratio))
+      printf('Check relative atten at new Fnyq * %f\n', (f_trans_end/intrp_ratio))
 
-      printf("Required relative attenuation (in dB):\n")
+      printf('Required relative attenuation (in dB):\n')
       atten_trans_end_dB
       
-      printf("Actual relative attenuation (min, in dB):\n")
+      printf('Actual relative attenuation (min, in dB):\n')
       rel_atten_dB
   
       break
@@ -103,13 +103,13 @@ end
 figure(figure_num); figure_num = figure_num + 1;
 subplot(2,2,1);
 plot(idx_sinc, sinc_func);
-title("sinc");
+title('sinc');
 subplot(2,2,2);
 plot(idx_sinc, wind_func);
-title("window");
+title('window');
 subplot(2,2,3)
 plot(idx_sinc, wsinc_func);
-title("windowed sinc");
+title('windowed sinc');
 subplot(2,2,4);
 periodogram(wsinc_func')
 
@@ -170,11 +170,11 @@ end
 
 % Save coefficients in file
 fid = fopen('poly_lanczos_wsinc_coeffs.txt', 'w');
-fprintf(fid, "%d\n", num_phases);
-fprintf(fid, "%d\n", num_taps);
+fprintf(fid, '%d\n', num_phases);
+fprintf(fid, '%d\n', num_taps);
 for idx_phase = 1:size(fir_poly)(1)
     for idx_tap = 1:size(fir_poly)(2)
-        fprintf(fid, "%f\n", fir_poly(idx_phase, idx_tap));
+        fprintf(fid, '%f\n', fir_poly(idx_phase, idx_tap));
     end
 end
 fclose(fid);

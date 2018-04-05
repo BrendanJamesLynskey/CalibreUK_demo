@@ -56,15 +56,14 @@ BW_new_Fnyq     = BW_old_Fnyq/num_phases;
 
 
 % Split Nyquist band into bands, forming freq and mag vectors
-f_vect = [];
-m_vect = [];
-
+f_vect    = [];
+m_vect    = [];
 mag_sband = power(10, (atten_trans_end_dB/-20));
 
 for idx_phs = 1 : (num_phases/2+1)
     mid_f   = (idx_phs-1) * 2/num_phases;
-    lower_f = mid_f - (BW_new_Fnyq);
-    upper_f = mid_f + (BW_new_Fnyq);   
+    lower_f = mid_f - BW_new_Fnyq;
+    upper_f = mid_f + BW_new_Fnyq;
     f_vect = [f_vect, max(0, lower_f), min(1, upper_f)];
     if (idx_phs == 1)
         m_vect = [m_vect, 1, 1];
@@ -78,15 +77,14 @@ end
 
 
 ls_filt = firls(num_phases*num_taps,f_vect,m_vect);
-
-% Use this command to ensure that impulse response is symmetric
+% Use following command to ensure that impulse response is symmetric
 %ls_filt = (ls_filt+fliplr(ls_filt))/2;
  
 % Plot filter and its PSD
 figure(figure_num); figure_num = figure_num + 1;
 subplot(2,1,1);
 stem(ls_filt);
-title("Least squares approx filter");
+title('Least squares approx filter');
 subplot(2,1,2);
 periodogram(ls_filt')
 
@@ -106,7 +104,7 @@ ls_filt_zpadlen = pow2(zeropad_pow2) - length(ls_filt);
 ls_filt_zpad    = [ls_filt', zeros(1, ls_filt_zpadlen)];
 
 for idx_phs = 1:num_phases
-    fir_poly(idx_phs, :) = downsample(ls_filt_zpad, num_phases, idx_phs-1)';    
+    fir_poly(idx_phs, :) = num_phases .* downsample(ls_filt_zpad, num_phases, idx_phs-1)';    
     % Normalise imp-response
     sum_mag                 = sum(fir_poly(idx_phs, :));
     fir_poly(idx_phs, :)   /= sum_mag;
@@ -135,11 +133,11 @@ end
 
 % Save coefficients in file
 fid = fopen('poly_leastsq_coeffs.txt', 'w');
-fprintf(fid, "%d\n", num_phases);
-fprintf(fid, "%d\n", num_taps);
+fprintf(fid, '%d\n', num_phases);
+fprintf(fid, '%d\n', num_taps);
 for idx_phs = 1:size(fir_poly)(1)
     for idx_tap = 1:size(fir_poly)(2)
-        fprintf(fid, "%f\n", fir_poly(idx_phs, idx_tap));
+        fprintf(fid, '%f\n', fir_poly(idx_phs, idx_tap));
     end
 end
 fclose(fid);
