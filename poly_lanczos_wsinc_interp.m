@@ -40,23 +40,7 @@ intrp_ratio        = 4;
 %signed_coeff_wid   = 9; % Altera multipliers used efficiently with 9b IPs
 signed_coeff_wid   = 18; % Altera multipliers used fully with 18b IPs
 
-% Specify required attenuation. Build up from abse-spec
-% Spec image power @end of transition band (worst-case folding here)
-%
-% Option 1) Spec attenuation guaranteed by Rec601 presampling filter (40dB)
-atten_trans_end_dB = 40;
-% Option 2) Spec SNR implied by 8b dynamic range (~48dB)
-%atten_trans_end_dB = 6.02 * 8;
-% Option 3) Spec SNR implied by 10b dynamic range (~60dB)
-%atten_trans_end_dB = 6.02 * 10;
-%
-% Add extra 3dB to make folded-down power insignificant
-atten_trans_end_dB = atten_trans_end_dB + 3;
-% Add factor for number of images which will fold-down                          - CHECK!
-atten_trans_end_dB = atten_trans_end_dB + log10(intrp_ratio-1);
-
-
-% Load Rec601 specs
+% Load Rec601 filter specs
 spec_rec601
 
 
@@ -71,7 +55,6 @@ spec_rec601
 %                       changes Fcutoff of sinc-filter (1 = all-pass)
 %
 %
-
 
 
 for sinc_pband_scale = 1.0:-0.001: 0.01
@@ -146,8 +129,6 @@ fir_poly        = zeros(num_phases, num_taps);
 % NB: Octave sinc() function is the normalised sinc: sin(pi*x)/(pi*x)
 % Integer arguments for sinc return 0 except at x=0, as each lobe occupies an
 % interval of 1 (assuming passband is 100% of Nyquist band)
-
-% Could use function downsample() here
 
 for idx_phs = num_phases:-1:1
     for idx_tap = 1:num_taps

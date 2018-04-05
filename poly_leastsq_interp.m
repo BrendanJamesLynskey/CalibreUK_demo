@@ -41,24 +41,7 @@ intrp_ratio        = 4;
 %signed_coeff_wid   = 9; % Altera multipliers used efficiently with 9b IPs
 signed_coeff_wid   = 18; % Altera multipliers used fully with 18b IPs
 
-% Specify required attenuation. Build up from abse-spec
-% Spec image power @end of transition band (worst-case folding here)
-%
-% Option 1) Spec attenuation guaranteed by Rec601 presampling filter (40dB)
-atten_trans_end_dB = 40;
-% Option 2) Spec SNR implied by 8b dynamic range (~48dB)
-%atten_trans_end_dB = 6.02 * 8;
-% Option 3) Spec SNR implied by 10b dynamic range (~60dB)
-%atten_trans_end_dB = 6.02 * 10;
-%
-% Add extra 3dB to make folded-down power insignificant
-atten_trans_end_dB = atten_trans_end_dB + 3;
-% Add factor for number of images which will fold-down                          - CHECK!
-atten_trans_end_dB = atten_trans_end_dB + log10(intrp_ratio-1);
-
-
-
-% Load Rec601 specs
+% Load Rec601 filter specs
 spec_rec601
 
 
@@ -75,24 +58,28 @@ BW_new_Fnyq     = BW_old_Fnyq/num_phases;
 % Split Nyquist band into bands, forming freq and mag vectors
 f_vect = [];
 m_vect = [];
-for idx_phs = 1 : (num_phases+1)
-    mid_f   = (idx_phs-1) * 1/num_phases;
-    lower_f = mid_f - (BW_new_Fnyq/2);
-    upper_f = mid_f + (BW_new_Fnyq/2);    
+
+mag_sband = power(10, (atten_trans_end_dB/-20));
+
+for idx_phs = 1 : (num_phases/2+1)
+    mid_f   = (idx_phs-1) * 2/num_phases;
+    lower_f = mid_f - (BW_new_Fnyq);
+    upper_f = mid_f + (BW_new_Fnyq);   
     f_vect = [f_vect, max(0, lower_f), min(1, upper_f)];
     if (idx_phs == 1)
         m_vect = [m_vect, 1, 1];
     else
-        m_vect = [m_vect, 0, 0];
+        m_vect = [m_vect, mag_sband, mag_sband];
     end
 end
 
-
-% Relative weighting for each band
-%w=[1 4000000 2000000 200000 200000 100000 100000 100000 ];
+% TODO: could play with relative-weighting for each band
+%w_vect=[...];
 
 
 ls_filt = firls(num_phases*num_taps,f_vect,m_vect);
+
+% Use this command to ensure that impulse response is symmetric
 %ls_filt = (ls_filt+fliplr(ls_filt))/2;
  
 % Plot filter and its PSD
@@ -116,7 +103,7 @@ fir_poly        = zeros(num_phases, num_taps);
 
 zeropad_pow2    = ceil(log2(length(ls_filt)));
 ls_filt_zpadlen = pow2(zeropad_pow2) - length(ls_filt);
-ls_filt_zpad    = [ls_filt', zeros(1, ls_filt_zpadlen)]
+ls_filt_zpad    = [ls_filt', zeros(1, ls_filt_zpadlen)];
 
 for idx_phs = 1:num_phases
     fir_poly(idx_phs, :) = downsample(ls_filt_zpad, num_phases, idx_phs-1)';    
