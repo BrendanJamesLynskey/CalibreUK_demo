@@ -16,13 +16,13 @@ lenna = imread('lenna.bmp');
 
 figure(figure_num); figure_num = figure_num + 1;
 imshow(lenna)
-title('Original Lenna');
+title('Original Lenna image');
 
 
 % Resize using Octave function
 figure(figure_num); figure_num = figure_num + 1;
 imshow(imresize(lenna./max(lenna), scale_fact))
-title('Lenna, scaled by Octave funciton');
+title('Lenna, scaled by Octave function');
 
 % Design a filter
 mag_sband = power(10, (target_atten_dB/-20));
@@ -51,7 +51,7 @@ end
 % Display the result, warts and all!
 figure(figure_num); figure_num = figure_num + 1;
 imshow(mat_vh_filt)
-title('Lenna, scaled by my funciton');
+title('Lenna, scaled by my function');
 
 
  

@@ -109,8 +109,8 @@ num_phases      = intrp_ratio;
 
 fir_poly        = zeros(num_phases, num_taps);
 
-% Decompose impulse response into sub-filters
 for idx_phs = 1:1:num_phases
+    % Extract sub-filter for this phase
     zpad_wsinc_func = [wsinc_func, zeros(1, num_phases-1)];
     fir_poly(idx_phs, :) = num_phases * downsample(zpad_wsinc_func, intrp_ratio, idx_phs-1);
     % Normalise imp-response

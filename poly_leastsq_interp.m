@@ -63,7 +63,7 @@ end
 %w_vect=[...];
 
 
-ls_filt = firls(num_phases*num_taps,f_vect,m_vect);
+ls_filt = firls(intrp_ratio*order_on_2,f_vect,m_vect);
 % Use following command to ensure that impulse response is symmetric
 %ls_filt = (ls_filt+fliplr(ls_filt))/2;
  
@@ -82,16 +82,20 @@ periodogram(ls_filt')
 % Generate polyphase coefficients for LS approx anti-imaging filter
 
 % Zero-pad taps to power-of-two, including central impulse
-num_taps        = num_taps + 1;
+%num_taps        = num_taps + 1;
 
 fir_poly        = zeros(num_phases, num_taps);
 
-zeropad_pow2    = ceil(log2(length(ls_filt)));
-ls_filt_zpadlen = pow2(zeropad_pow2) - length(ls_filt);
-ls_filt_zpad    = [ls_filt', zeros(1, ls_filt_zpadlen)];
+%zeropad_pow2    = ceil(log2(length(ls_filt)));
+%ls_filt_zpadlen = pow2(zeropad_pow2) - length(ls_filt);
+%ls_filt_zpad    = [ls_filt', zeros(1, ls_filt_zpadlen)];
+
+%ls_filt_zpad    = [ls_filt', zeros(1, num_phases-1)];
+ls_filt_zpad    = ls_filt';
 
 for idx_phs = 1:num_phases
-    fir_poly(idx_phs, :) = num_phases .* downsample(ls_filt_zpad, num_phases, idx_phs-1)';    
+    sub_filter = downsample(ls_filt_zpad, num_phases, idx_phs-1)';
+    fir_poly(idx_phs, :)    = num_phases .* sub_filter;
     % Normalise imp-response
     sum_mag                 = sum(fir_poly(idx_phs, :));
     fir_poly(idx_phs, :)   /= sum_mag;
@@ -100,7 +104,6 @@ for idx_phs = 1:num_phases
     scale_fact              = 2 ^ (signed_coeff_wid - 2);
     scaled_taps             = fir_poly(idx_phs, :) .* scale_fact;
     fir_poly(idx_phs, :)    = round(scaled_taps)   ./ (scale_fact);
-
 end
 
 
