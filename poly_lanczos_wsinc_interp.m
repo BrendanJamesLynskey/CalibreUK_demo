@@ -130,15 +130,18 @@ fir_poly        = zeros(num_phases, num_taps);
 % Integer arguments for sinc return 0 except at x=0, as each lobe occupies an
 % interval of 1 (assuming passband is 100% of Nyquist band)
 
-for idx_phs = num_phases:-1:1
+%for idx_phs = num_phases:-1:1
+for idx_phs = 1:1:num_phases
     for idx_tap = 1:num_taps
         % Choose x co-ordinate for sub-filter in question
         % Step over x-axis with increments of 1 (single lobe)
-        % Each subsequent phase starts a fraction of a lobe to the left,
-        % that's because in convoution, impulse-response is LR flipped
-        phs_offset                 = (idx_phs - num_phases - 1) / num_phases;
+        phs_offset                 = (idx_phs - 1) / num_phases;
         x_coord                    = (-1 * lanczos_order) + (idx_tap-1) + phs_offset;
-        sinc_val                   = sinc_pband_scale * sinc(x_coord .* sinc_pband_scale);
+        if (abs(x_coord) > lanczos_order) % Maintain windowed region
+          sinc_val                   = 0;
+        else
+          sinc_val                   = sinc_pband_scale * sinc(x_coord .* sinc_pband_scale);
+        end
         % Lanczos window uses a dilated central lobe to weight the sinc function,
         % weights decreasing as move away from x=0
         wind_val                   = sinc(x_coord ./ lanczos_order);
