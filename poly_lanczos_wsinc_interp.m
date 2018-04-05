@@ -2,31 +2,24 @@
 % Brendan Lynskey 2018
 %
 
-% Design 1D interpolation filter for SD video (Rec 601)
-%
-% Provides a few options for specification of desired filter charachteristics
-%
-%
-% Real video signals captured using pre-sampling anti-alias filter
-% BT.601 recommended pre-sampling filter is ~halfband, as follows:
-%    12dB atten @6.75MHz (@0.25 x Fs)
-%    40dB atten @8.00MHz (@0.30 x Fs)
-%
-% Will assume all significant signal-energy contained within this mask
-% Aim to make SNR no worse than this
-%
-% Dynamic range of signals, assuming that use full-scale:
-%   8b samples: ~48dB
-%  10b samples: ~60dB
-%
-%
-% NB: not specifying passband ripple
 
 clear all
 close all
 figure_num = 1;
 
-% Specify filter
+% Windowed sinc filter:
+% Sinc good as a filter as symmetric, and linear phase preserves edges
+% Octave sinc() function is the normalised sinc: sin(pi*x)/(pi*x)
+%
+% Lanczos window:
+%    Single main sinc lobe
+%    Zero @ lower & upper edges of main lobe, and beyond
+%
+% Make simple odd-order FIR, which captures central lobe & extra lobes on *both* sides.
+% Odd order filter co-sites (some) output samples with the input samples
+
+
+% Specify filter:
 %
 %    lanczos_order:    number of lobes each side of the main-lobe.
 %                      higher order yields higher performance, at greater cost
@@ -47,31 +40,25 @@ spec_rec601
 % PART 1
 % Generate 1D windowed sinc filter (Lanczos window), over-sampled for upscaling
 %
-% Filter should, after up-sampling, attenuate images sufficiently
-% for given lanczos_order and intrp_ratio
 % 
 % Find highest filter Fcutoff for desired attenuation from f_trans_end to PI
 %     sinc_pband_scale: sinc argument scale-factor. 
 %                       changes Fcutoff of sinc-filter (1 = all-pass)
 %
-%
-
+% Filter should, after up-sampling, attenuate images sufficiently
+% for given lanczos_order and intrp_ratio
 
 for sinc_pband_scale = 1.0:-0.001: 0.01
 
-  %printf('Check relative atten at sinc_pband_scale = %f\n', sinc_pband_scale)
-
-  % Generate normalised sinc filter. Sinc good as filter must be symmetric,
-  % as linear phase preserves edges in images
-  % Then generate Lanczos window:
-  %    Single main sinc lobe, scaled_taps
-  %    Zero at lower and upper extremes
+  % Generate normalised sinc filter
+  %
+  
   idx_sinc        = (-1*lanczos_order) : 1/intrp_ratio : lanczos_order;
 
   sinc_func       = sinc(idx_sinc .* sinc_pband_scale);
   wind_func       = sinc(idx_sinc ./ lanczos_order);
 
-  % Windowing i.e. element-wise mult produces prototype filter
+  % Windowing (element-wise mult) produces filter Impulse Response
   wsinc_func      = sinc_func .* wind_func;
     
   [Pxx, W]        = periodogram(wsinc_func'); % Calc PSD for analysis
@@ -117,36 +104,15 @@ periodogram(wsinc_func')
 
 % PART 2
 % Generate polyphase coefficients for Lanczos anti-imaging filter
-% Make simple odd-order FIR, which captures central lobe,
-% and the extra lobes on *both* sides.
-% Odd order filter co-sites output with the input samples
 num_taps        = (2*lanczos_order) + 1;
 num_phases      = intrp_ratio;
 
 fir_poly        = zeros(num_phases, num_taps);
 
-% Generate impulse response for each of the polyphase filters
-% NB: Octave sinc() function is the normalised sinc: sin(pi*x)/(pi*x)
-% Integer arguments for sinc return 0 except at x=0, as each lobe occupies an
-% interval of 1 (assuming passband is 100% of Nyquist band)
-
-%for idx_phs = num_phases:-1:1
+% Decompose impulse response into sub-filters
 for idx_phs = 1:1:num_phases
-    for idx_tap = 1:num_taps
-        % Choose x co-ordinate for sub-filter in question
-        % Step over x-axis with increments of 1 (single lobe)
-        phs_offset                 = (idx_phs - 1) / num_phases;
-        x_coord                    = (-1 * lanczos_order) + (idx_tap-1) + phs_offset;
-        if (abs(x_coord) > lanczos_order) % Maintain windowed region
-          sinc_val                   = 0;
-        else
-          sinc_val                   = sinc_pband_scale * sinc(x_coord .* sinc_pband_scale);
-        end
-        % Lanczos window uses a dilated central lobe to weight the sinc function,
-        % weights decreasing as move away from x=0
-        wind_val                   = sinc(x_coord ./ lanczos_order);
-        fir_poly(idx_phs, idx_tap) = sinc_val * wind_val;
-    end
+    zpad_wsinc_func = [wsinc_func, zeros(1, num_phases-1)];
+    fir_poly(idx_phs, :) = num_phases * downsample(zpad_wsinc_func, intrp_ratio, idx_phs-1);
     % Normalise imp-response
     sum_mag                 = sum(fir_poly(idx_phs, :));
     fir_poly(idx_phs, :)   /= sum_mag;
@@ -181,8 +147,6 @@ for idx_phase = 1:size(fir_poly)(1)
     end
 end
 fclose(fid);
-
-
 
 
 % PART 3: test

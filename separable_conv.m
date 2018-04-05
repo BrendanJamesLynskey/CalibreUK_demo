@@ -16,15 +16,17 @@ lenna = imread('lenna.bmp');
 
 figure(figure_num); figure_num = figure_num + 1;
 imshow(lenna)
+title('Original Lenna');
+
 
 % Resize using Octave function
 figure(figure_num); figure_num = figure_num + 1;
 imshow(imresize(lenna./max(lenna), scale_fact))
-
+title('Lenna, scaled by Octave funciton');
 
 % Design a filter
 mag_sband = power(10, (target_atten_dB/-20));
-f = [0, 0.8/scale_fact, 1.2/scale_fact, 1];
+f = [0, 0.9/scale_fact, 1.2/scale_fact, 1];
 m = [1 1 mag_sband mag_sband];
 filt_interp = firls(32, f, m);
 filt_interp = filt_interp ./ sum(filt_interp); % Normalise imp-response
@@ -49,7 +51,7 @@ end
 % Display the result, warts and all!
 figure(figure_num); figure_num = figure_num + 1;
 imshow(mat_vh_filt)
-
+title('Lenna, scaled by my funciton');
 
 
  

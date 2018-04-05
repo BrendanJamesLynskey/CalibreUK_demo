@@ -2,32 +2,19 @@
 % Brendan Lynskey 2018
 %
 
-% Design 1D interpolation filter for SD video (Rec 601)
-%
-% Provides a few options for specification of desired filter charachteristics
-%
-%
-% Real video signals captured using pre-sampling anti-alias filter
-% BT.601 recommended pre-sampling filter is ~halfband, as follows:
-%    12dB atten @6.75MHz (@0.25 x Fs)
-%    40dB atten @8.00MHz (@0.30 x Fs)
-%
-% Will assume all significant signal-energy contained within this mask
-% Aim to make SNR no worse than this
-%
-% Dynamic range of signals, assuming that use full-scale:
-%   8b samples: ~48dB
-%  10b samples: ~60dB
-%
-%
-% NB: not specifying passband ripple
-%
 
 clear all
 close all
 figure_num = 1;
 
-% Specify filter
+% Least-squares filter:
+%  This is just an FIR filter designed via the Octave firls() function
+%  From the help:
+%     FIR filter design using least squares method.  Returns a length N+1
+%     linear phase filter such that the integral of the weighted mean
+%     squared error in the specified bands is minimized.
+
+% Specify filter:
 %
 %    order_on_2:       number of taps each side of central tap
 %                      higher order yields higher performance, at greater cost
