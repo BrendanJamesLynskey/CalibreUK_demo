@@ -73,4 +73,5 @@ filename_coeffs = 'poly_leastsq_coeffs.txt';
 gen_polyphase
 
 % PART 3: test
-test_filter
+test_1D
+test_2D

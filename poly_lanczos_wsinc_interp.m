@@ -75,11 +75,16 @@ for sinc_pband_scale = 1.0:-0.001: 0.01
       
       printf('Actual relative attenuation (min, in dB):\n')
       rel_atten_dB
+      
+      % Normalise imp-response magnitude
+      wsinc_func /= sum(wsinc_func);
   
       break
   end
 
 end
+
+
 
  
 % Plot sinc, window, windowed-sinc and its PSD
@@ -105,4 +110,5 @@ filename_coeffs = 'poly_lanczos_wsinc_coeffs.txt';
 gen_polyphase
 
 % PART 3: test
-test_filter
+test_1D
+test_2D

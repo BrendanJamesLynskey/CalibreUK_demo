@@ -13,13 +13,13 @@ for idx_phs = 1:num_phases
     % Extract sub-filter for this phase
     fir_poly(idx_phs, :) = num_phases * downsample(zpad_wsinc_func, intrp_ratio, idx_phs-1);
     % Normalise imp-response
-    sum_mag                 = sum(fir_poly(idx_phs, :));
-    fir_poly(idx_phs, :)   /= sum_mag;
+    sum_mag              = sum(fir_poly(idx_phs, :));
+    fir_poly(idx_phs, :) /= sum_mag;
     % Round coefficients to nearest fixed-point value
     % For range of +/-1, need 2 integer bits
-    scale_fact              = 2 ^ (signed_coeff_wid - 2);
-    scaled_taps             = fir_poly(idx_phs, :) .* scale_fact;
-    fir_poly(idx_phs, :)    = round(scaled_taps)   ./ (scale_fact);
+    scale_fact           = 2 ^ (signed_coeff_wid - 2);
+    scaled_taps          = fir_poly(idx_phs, :) .* scale_fact;
+    fir_poly(idx_phs, :) = round(scaled_taps)   ./ (scale_fact);
 end
 
 % Plot PSD of each phase. Check that all have low-pass spectrum!
