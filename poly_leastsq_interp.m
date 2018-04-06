@@ -70,55 +70,11 @@ periodogram(ls_filt')
 
 % PART 2
 % Generate polyphase coefficients for LS approx anti-imaging filter
-num_taps        = (fir_ord_on2*2) + 1;
-num_phases      = intrp_ratio;
 
-fir_poly        = zeros(num_phases, num_taps);
-
-% Zero-pad impulse response so can make equal length sub-filters
-zpad_ls_filt    = [ls_filt', zeros(1, num_phases-1)];
-
-for idx_phs = 1:num_phases
-    sub_filter              = downsample(zpad_ls_filt, num_phases, idx_phs-1)';
-    fir_poly(idx_phs, :)    = num_phases .* sub_filter;
-    % Normalise imp-response
-    sum_mag                 = sum(fir_poly(idx_phs, :));
-    fir_poly(idx_phs, :)   /= sum_mag;
-    % Round coefficients to nearest fixed-point value
-    % For range of +/-1, need 2 integer bits
-    scale_fact              = 2 ^ (signed_coeff_wid - 2);
-    scaled_taps             = fir_poly(idx_phs, :) .* scale_fact;
-    fir_poly(idx_phs, :)    = round(scaled_taps)   ./ (scale_fact);
-end
+fir_imp_resp    = ls_filt';
+filename_coeffs = 'poly_leastsq_coeffs.txt';
+gen_polyphase
 
 
-% Plot PSD of each phase. Check that all have low-pass spectrum!
-figure(figure_num); figure_num = figure_num + 1;
-
-subplot_num = 1;
-for phase = 1 : num_phases
-    subplot(num_phases, 2, subplot_num);
-    subplot_num = subplot_num + 1;
-    plot(1:num_taps, fir_poly(phase, :));
-
-    subplot(num_phases, 2, subplot_num);
-    subplot_num = subplot_num + 1;
-    periodogram(fir_poly(phase, :)');
-end
-
-% Save coefficients in file
-fid = fopen('poly_leastsq_coeffs.txt', 'w');
-fprintf(fid, '%d\n', num_phases);
-fprintf(fid, '%d\n', num_taps);
-for idx_phs = 1:size(fir_poly)(1)
-    for idx_tap = 1:size(fir_poly)(2)
-        fprintf(fid, '%f\n', fir_poly(idx_phs, idx_tap));
-    end
-end
-fclose(fid);
-
-
-
-
-% PART 4: test
+% PART 3: test
 test_filter
