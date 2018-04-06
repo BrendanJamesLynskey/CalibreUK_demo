@@ -7,12 +7,12 @@ close all;
 figure_num = 1;
 
 
-pxl_depth       = 8;
 scale_fact      = 2;
 target_atten_dB = 70;
 
 % Load 8b greyscale test-image (what else!?)
-lenna = imread('lenna_256x256.bmp');
+pxl_depth       = 8;
+lenna           = imread('lenna_256x256.bmp');
 figure(figure_num); figure_num = figure_num + 1;
 imshow(lenna)
 title('Original Lenna image');
@@ -24,14 +24,22 @@ imshow(imresize(lenna, scale_fact))
 title('Lenna, scaled by Octave function');
 
 % Convert the output to doubles
-lenna_double = cast(lenna, 'double') ./ power(2, pxl_depth);
+lenna_double    = cast(lenna, 'double') ./ power(2, pxl_depth);
 
-% Design a filter
-mag_sband = power(10, (target_atten_dB/-20));
-f = [0, 0.9/scale_fact, 1.2/scale_fact, 1];
-m = [1 1 mag_sband mag_sband];
-filt_interp = firls(32, f, m);
-filt_interp = filt_interp ./ sum(filt_interp); % Normalise imp-response
+% Upsample the image
+lenna_double_usc  = upsample(lenna_double,      scale_fact);  % Column upsample
+lenna_double_usc  = lenna_double_usc  .* scale_fact;          % Mag scale
+lenna_double_usrc = upsample(lenna_double_usc', scale_fact)'; % Row upsample
+lenna_double_usrc = lenna_double_usrc .* scale_fact;          % Mag scale
+
+
+% Design a LPF
+firls_order     = 32;
+mag_sband       = power(10, (target_atten_dB/-20));
+f               = [0, 0.9/scale_fact, 1.2/scale_fact, 1];
+m               = [1 1 mag_sband mag_sband];
+filt_interp     = firls(firls_order, f, m);
+filt_interp     = filt_interp ./ sum(filt_interp); % Normalise imp-response
 
 figure(figure_num); figure_num = figure_num + 1;
 periodogram(filt_interp)
@@ -40,8 +48,8 @@ periodogram(filt_interp)
 
 % Perform vertical convolution
 mat_v_filt = [];
-for idx_col = 1:size(lenna)(2)
-    mat_v_filt = [mat_v_filt, conv(lenna_double(:, idx_col), filt_interp)];
+for idx_col = 1:size(lenna_double_usrc)(2)
+    mat_v_filt = [mat_v_filt, conv(lenna_double_usrc(:, idx_col), filt_interp)];
 end
 
 % Perform horizontal convolution
