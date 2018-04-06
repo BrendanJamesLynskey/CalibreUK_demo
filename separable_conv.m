@@ -7,8 +7,20 @@ close all;
 figure_num = 1;
 
 
-scale_fact      = 2;
+intrp_ratio     = 4;
 target_atten_dB = 70;
+
+% Design an LPF
+firls_order     = 28;
+mag_sband       = power(10, (target_atten_dB/-20));
+f               = [0, 0.9/intrp_ratio, 1.2/intrp_ratio, 1];
+m               = [1 1 mag_sband mag_sband];
+filt_interp     = firls(firls_order, f, m);
+filt_interp     = filt_interp ./ sum(filt_interp); % Normalise imp-response
+
+figure(figure_num); figure_num = figure_num + 1;
+periodogram(filt_interp)
+
 
 % Load 8b greyscale test-image
 pxl_depth       = 8;
@@ -20,31 +32,17 @@ title('Original image');
 
 % Resize using Octave function
 figure(figure_num); figure_num = figure_num + 1;
-imshow(imresize(image, scale_fact))
+imshow(imresize(image, intrp_ratio))
 title('Image, scaled by Octave function');
 
 % Convert the output to doubles
 image_double    = cast(image, 'double') ./ power(2, pxl_depth);
 
 % Upsample the image
-image_double_usc  = upsample(image_double,      scale_fact);  % Column upsample
-image_double_usc  = image_double_usc  .* scale_fact;          % Mag scale
-image_double_usrc = upsample(image_double_usc', scale_fact)'; % Row upsample
-image_double_usrc = image_double_usrc .* scale_fact;          % Mag scale
-
-
-% Design a LPF
-firls_order     = 28;
-mag_sband       = power(10, (target_atten_dB/-20));
-f               = [0, 0.9/scale_fact, 1.2/scale_fact, 1];
-m               = [1 1 mag_sband mag_sband];
-filt_interp     = firls(firls_order, f, m);
-filt_interp     = filt_interp ./ sum(filt_interp); % Normalise imp-response
-
-figure(figure_num); figure_num = figure_num + 1;
-periodogram(filt_interp)
-
-
+image_double_usc  = upsample(image_double,      intrp_ratio);  % Column upsample
+image_double_usc  = image_double_usc  .* intrp_ratio;          % Mag scale
+image_double_usrc = upsample(image_double_usc', intrp_ratio)'; % Row upsample
+image_double_usrc = image_double_usrc .* intrp_ratio;          % Mag scale
 
 % Perform vertical convolution
 mat_v_filt = [];
