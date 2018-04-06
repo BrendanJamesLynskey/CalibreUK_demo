@@ -37,6 +37,7 @@ for phase = 1 : num_phases
 end
 
 % Save coefficients in file
+filename_coeffs = sprintf('%s%s', filter_name, '_poly_coeffs.txt');
 fid = fopen(filename_coeffs, 'w');
 fprintf(fid, '%d\n', num_phases);
 fprintf(fid, '%d\n', num_taps);

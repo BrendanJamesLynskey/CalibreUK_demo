@@ -18,6 +18,7 @@ figure_num = 1;
 % Make simple odd-order FIR, which captures central lobe & extra lobes on *both* sides.
 % Odd order filter co-sites (some) output samples with the input samples
 
+filter_name = 'lanczos-winsinc-filter';
 
 % Load filter spec
 spec_filt
@@ -50,9 +51,9 @@ for sinc_pband_scale = 1.0:-0.001: 0.01
   wind_func       = sinc(idx_sinc ./ lanczos_order);
 
   % Windowing (element-wise mult) produces filter Impulse Response
-  wsinc_func      = sinc_func .* wind_func;
+  fir_imp_resp      = sinc_func .* wind_func;
     
-  [Pxx, W]        = periodogram(wsinc_func'); % Calc PSD for analysis
+  [Pxx, W]        = periodogram(fir_imp_resp'); % Calc PSD for analysis
 
   num_bins_2pi    = 2*(length(Pxx)-1);
   bin_trans_end   = round(num_bins_2pi*f_trans_end/intrp_ratio);
@@ -77,7 +78,7 @@ for sinc_pband_scale = 1.0:-0.001: 0.01
       rel_atten_dB
       
       % Normalise imp-response magnitude
-      wsinc_func /= sum(wsinc_func);
+      fir_imp_resp /= sum(fir_imp_resp);
   
       break
   end
@@ -96,17 +97,15 @@ subplot(2,2,2);
 plot(idx_sinc, wind_func);
 title('window');
 subplot(2,2,3)
-plot(idx_sinc, wsinc_func);
+plot(idx_sinc, fir_imp_resp);
 title('windowed sinc');
 subplot(2,2,4);
-periodogram(wsinc_func')
+periodogram(fir_imp_resp')
 
 
 
 % PART 2
 % Generate polyphase coefficients for Lanczos anti-imaging filter
-fir_imp_resp    = wsinc_func;
-filename_coeffs = 'poly_lanczos_wsinc_coeffs.txt';
 gen_polyphase
 
 % PART 3: test

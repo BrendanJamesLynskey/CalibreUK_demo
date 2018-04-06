@@ -15,6 +15,7 @@ figure_num = 1;
 %     squared error in the specified bands is minimized.
 % This is good as linear phase preserves edges
 
+filter_name = 'leastsq-approx-filter';
 
 % Load filter spec
 spec_filt
@@ -49,8 +50,7 @@ end
 % TODO: could play with relative-weighting for each band
 %w_vect=[...];
 
-
-ls_filt = firls(intrp_ratio*fir_ord_on2*2,f_vect,m_vect);
+fir_imp_resp  = firls(intrp_ratio*fir_ord_on2*2,f_vect,m_vect)';
 
 % Could use following command to ensure that impulse response is symmetric
 %ls_filt = (ls_filt+fliplr(ls_filt))/2;
@@ -58,18 +58,16 @@ ls_filt = firls(intrp_ratio*fir_ord_on2*2,f_vect,m_vect);
 % Plot filter and its PSD
 figure(figure_num); figure_num = figure_num + 1;
 subplot(2,1,1);
-stem(ls_filt);
-title('Least squares approx filter');
+stem(fir_imp_resp);
+title(filter_name);
 subplot(2,1,2);
-periodogram(ls_filt')
+periodogram(fir_imp_resp)
 
 
 
 
 % PART 2
 % Generate polyphase coefficients for LS approx anti-imaging filter
-fir_imp_resp    = ls_filt';
-filename_coeffs = 'poly_leastsq_coeffs.txt';
 gen_polyphase
 
 % PART 3: test
