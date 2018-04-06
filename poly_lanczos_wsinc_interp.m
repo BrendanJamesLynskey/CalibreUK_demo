@@ -22,7 +22,7 @@ figure_num = 1;
 % Load filter spec
 spec_filt
 
-% Load Rec601 filter specs
+% Load Rec601 signal spec
 spec_rec601
 
 
@@ -98,7 +98,6 @@ periodogram(wsinc_func')
 fir_imp_resp    = wsinc_func;
 filename_coeffs = 'poly_lanczos_wsinc_coeffs.txt';
 gen_polyphase
-
 
 % PART 3: test
 test_filter

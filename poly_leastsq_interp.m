@@ -19,14 +19,12 @@ figure_num = 1;
 % Load filter spec
 spec_filt
 
-% Load Rec601 filter specs
+% Load Rec601 signal spec
 spec_rec601
 
 
 % PART 1
 % Generate 1D least-squares approx filter, over-sampled for upscaling
-
-
 BW_old_Fnyq     = f_presamp_40dB/(f_samp_orig/2);
 BW_new_Fnyq     = BW_old_Fnyq/intrp_ratio;
 
@@ -54,7 +52,7 @@ end
 
 ls_filt = firls(intrp_ratio*fir_ord_on2*2,f_vect,m_vect);
 
-% Use following command to ensure that impulse response is symmetric
+% Could use following command to ensure that impulse response is symmetric
 %ls_filt = (ls_filt+fliplr(ls_filt))/2;
  
 % Plot filter and its PSD
@@ -70,11 +68,9 @@ periodogram(ls_filt')
 
 % PART 2
 % Generate polyphase coefficients for LS approx anti-imaging filter
-
 fir_imp_resp    = ls_filt';
 filename_coeffs = 'poly_leastsq_coeffs.txt';
 gen_polyphase
-
 
 % PART 3: test
 test_filter

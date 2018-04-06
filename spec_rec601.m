@@ -1,11 +1,8 @@
-% Specify Rec601 presampling filter
+% Use Rec601 presampling filter spec to describe the signal
+% Thereby specify targets for our interpolation filter
 % Brendan Lynskey 2018
 
-% Specify 1D interpolation filter for SD video (Rec 601)
-%
-% Provides a few options for specification of desired filter charachteristics
-%
-%
+
 % Real video signals captured using pre-sampling anti-alias filter
 % BT.601 recommended pre-sampling filter is ~halfband, as follows:
 %    12dB atten @6.75MHz (@0.25 x Fs)
@@ -13,13 +10,6 @@
 %
 % Will assume all significant signal-energy contained within this mask
 % Aim to make SNR no worse than this
-%
-% Dynamic range of signals, assuming that use full-scale:
-%   8b samples: ~48dB
-%  10b samples: ~60dB
-%
-%
-% NB: not specifying passband ripple
 
 
 % Specify Rec601 presampling filter mask
@@ -29,6 +19,17 @@ f_presamp_40dB     =  8000000;
 f_trans_beg        = (f_samp_orig * 0.25) / f_samp_orig;
 f_trans_end        = (f_samp_orig - f_presamp_40dB) / f_samp_orig;
 
+
+
+% Specify 1D interpolation filter for Rec 601 video
+%
+% Provide a few options for specification of desired filter charachteristics
+%
+% Dynamic range of signals, assuming that use full-scale:
+%   8b samples: ~48dB
+%  10b samples: ~60dB
+%
+% NB: not specifying passband ripple
 
 
 % Specify required attenuation. Build up from base-spec
