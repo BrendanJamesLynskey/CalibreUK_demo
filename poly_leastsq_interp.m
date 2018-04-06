@@ -13,33 +13,22 @@ figure_num = 1;
 %     FIR filter design using least squares method.  Returns a length N+1
 %     linear phase filter such that the integral of the weighted mean
 %     squared error in the specified bands is minimized.
+% This is good as linear phase preserves edges
 
-% Specify filter:
-%
-%    symm_filt_ord:    number of taps in symm-FIR (excluding central impulse)
-%                      higher order yields higher performance, at greater cost
-%    intrp_ratio:      desired interpolation (scaling) factor
-%                      equals number of sub-filter phases
-%    signed_coeff_wid: bit-width of FIR coefficients (2's complement)
-%                      must represent +/-1, so 2 MS bits to left of binary point
-%
-symm_filt_ord      = 3*2;
-intrp_ratio        = 4;
-%signed_coeff_wid   = 9; % Altera multipliers used efficiently with 9b IPs
-signed_coeff_wid   = 18; % Altera multipliers used fully with 18b IPs
+
+% Load filter spec
+spec_filt
 
 % Load Rec601 filter specs
 spec_rec601
 
 
-
 % PART 1
 % Generate 1D least-squares approx filter, over-sampled for upscaling
-num_taps        = symm_filt_ord + 1;
-num_phases      = intrp_ratio;
+
 
 BW_old_Fnyq     = f_presamp_40dB/(f_samp_orig/2);
-BW_new_Fnyq     = BW_old_Fnyq/num_phases;
+BW_new_Fnyq     = BW_old_Fnyq/intrp_ratio;
 
 
 % Split Nyquist band into bands, forming freq and mag vectors
@@ -47,8 +36,8 @@ f_vect    = [];
 m_vect    = [];
 mag_sband = power(10, (atten_trans_end_dB/-20));
 
-for idx_phs = 1 : (num_phases/2+1)
-    mid_f   = (idx_phs-1) * 2/num_phases;
+for idx_phs = 1 : (intrp_ratio/2+1)
+    mid_f   = (idx_phs-1) * 2/intrp_ratio;
     lower_f = mid_f - BW_new_Fnyq;
     upper_f = mid_f + BW_new_Fnyq;
     f_vect = [f_vect, max(0, lower_f), min(1, upper_f)];
@@ -63,7 +52,7 @@ end
 %w_vect=[...];
 
 
-ls_filt = firls(intrp_ratio*symm_filt_ord,f_vect,m_vect);
+ls_filt = firls(intrp_ratio*fir_ord_on2*2,f_vect,m_vect);
 
 % Use following command to ensure that impulse response is symmetric
 %ls_filt = (ls_filt+fliplr(ls_filt))/2;
@@ -81,13 +70,16 @@ periodogram(ls_filt')
 
 % PART 2
 % Generate polyphase coefficients for LS approx anti-imaging filter
+num_taps        = (fir_ord_on2*2) + 1;
+num_phases      = intrp_ratio;
+
 fir_poly        = zeros(num_phases, num_taps);
 
 % Zero-pad impulse response so can make equal length sub-filters
-ls_filt_zpad    = [ls_filt', zeros(1, num_phases-1)];
+zpad_ls_filt    = [ls_filt', zeros(1, num_phases-1)];
 
 for idx_phs = 1:num_phases
-    sub_filter = downsample(ls_filt_zpad, num_phases, idx_phs-1)';
+    sub_filter              = downsample(zpad_ls_filt, num_phases, idx_phs-1)';
     fir_poly(idx_phs, :)    = num_phases .* sub_filter;
     % Normalise imp-response
     sum_mag                 = sum(fir_poly(idx_phs, :));

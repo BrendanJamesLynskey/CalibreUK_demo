@@ -19,19 +19,8 @@ figure_num = 1;
 % Odd order filter co-sites (some) output samples with the input samples
 
 
-% Specify filter:
-%
-%    lanczos_order:    number of lobes each side of the main-lobe.
-%                      higher order yields higher performance, at greater cost
-%    intrp_ratio:      desired interpolation (scaling) factor
-%                      equals number of sub-filter phases
-%    signed_coeff_wid: bit-width of FIR coefficients (2's complement)
-%                      must represent +/-1, so 2 MS bits to left of binary point
-%
-lanczos_order      = 3;
-intrp_ratio        = 4;
-%signed_coeff_wid   = 9; % Altera multipliers used efficiently with 9b IPs
-signed_coeff_wid   = 18; % Altera multipliers used fully with 18b IPs
+% Load filter spec
+spec_filt
 
 % Load Rec601 filter specs
 spec_rec601
@@ -47,6 +36,8 @@ spec_rec601
 %
 % Filter should, after up-sampling, attenuate images sufficiently
 % for given lanczos_order and intrp_ratio
+
+lanczos_order = fir_ord_on2;
 
 for sinc_pband_scale = 1.0:-0.001: 0.01
 
@@ -109,9 +100,11 @@ num_phases      = intrp_ratio;
 
 fir_poly        = zeros(num_phases, num_taps);
 
-for idx_phs = 1:1:num_phases
+% Zero-pad impulse response so can make equal length sub-filters
+zpad_wsinc_func = [wsinc_func, zeros(1, num_phases-1)];
+
+for idx_phs = 1:num_phases
     % Extract sub-filter for this phase
-    zpad_wsinc_func = [wsinc_func, zeros(1, num_phases-1)];
     fir_poly(idx_phs, :) = num_phases * downsample(zpad_wsinc_func, intrp_ratio, idx_phs-1);
     % Normalise imp-response
     sum_mag                 = sum(fir_poly(idx_phs, :));
