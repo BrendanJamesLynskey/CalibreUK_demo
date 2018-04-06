@@ -10,31 +10,31 @@ figure_num = 1;
 scale_fact      = 2;
 target_atten_dB = 70;
 
-% Load 8b greyscale test-image (what else!?)
+% Load 8b greyscale test-image
 pxl_depth       = 8;
-lenna           = imread('lenna_256x256.bmp');
+image           = imread('lenna_256x256.bmp');
 figure(figure_num); figure_num = figure_num + 1;
-imshow(lenna)
-title('Original Lenna image');
+imshow(image)
+title('Original image');
 
 
 % Resize using Octave function
 figure(figure_num); figure_num = figure_num + 1;
-imshow(imresize(lenna, scale_fact))
-title('Lenna, scaled by Octave function');
+imshow(imresize(image, scale_fact))
+title('Image, scaled by Octave function');
 
 % Convert the output to doubles
-lenna_double    = cast(lenna, 'double') ./ power(2, pxl_depth);
+image_double    = cast(image, 'double') ./ power(2, pxl_depth);
 
 % Upsample the image
-lenna_double_usc  = upsample(lenna_double,      scale_fact);  % Column upsample
-lenna_double_usc  = lenna_double_usc  .* scale_fact;          % Mag scale
-lenna_double_usrc = upsample(lenna_double_usc', scale_fact)'; % Row upsample
-lenna_double_usrc = lenna_double_usrc .* scale_fact;          % Mag scale
+image_double_usc  = upsample(image_double,      scale_fact);  % Column upsample
+image_double_usc  = image_double_usc  .* scale_fact;          % Mag scale
+image_double_usrc = upsample(image_double_usc', scale_fact)'; % Row upsample
+image_double_usrc = image_double_usrc .* scale_fact;          % Mag scale
 
 
 % Design a LPF
-firls_order     = 32;
+firls_order     = 28;
 mag_sband       = power(10, (target_atten_dB/-20));
 f               = [0, 0.9/scale_fact, 1.2/scale_fact, 1];
 m               = [1 1 mag_sband mag_sband];
@@ -48,8 +48,8 @@ periodogram(filt_interp)
 
 % Perform vertical convolution
 mat_v_filt = [];
-for idx_col = 1:size(lenna_double_usrc)(2)
-    mat_v_filt = [mat_v_filt, conv(lenna_double_usrc(:, idx_col), filt_interp)];
+for idx_col = 1:size(image_double_usrc)(2)
+    mat_v_filt = [mat_v_filt, conv(image_double_usrc(:, idx_col), filt_interp)];
 end
 
 % Perform horizontal convolution
@@ -64,7 +64,7 @@ mat_vh_filt_uint8 = cast(mat_vh_filt .* power(2, pxl_depth), 'uint8');
 % Display the result, warts and all!
 figure(figure_num); figure_num = figure_num + 1;
 imshow(mat_vh_filt_uint8)
-title('Lenna, scaled by my function');
+title('Image, scaled by my function');
 
 
  

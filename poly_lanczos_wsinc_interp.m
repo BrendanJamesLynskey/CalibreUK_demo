@@ -56,6 +56,11 @@ for sinc_pband_scale = 1.0:-0.001: 0.01
 
   num_bins_2pi    = 2*(length(Pxx)-1);
   bin_trans_end   = round(num_bins_2pi*f_trans_end/intrp_ratio);
+  
+  % Currenly check all bands above end of transition band.
+  % TODO: could only check bands which can have significant image power.
+  %       Probably wouldn't help as stopband lobes are wide,
+  %       and they become smaller in magnitude at higher frequencies
   min_atten       = max(Pxx(bin_trans_end:end));
   rel_atten_dB    = 10* log10(Pxx(1)) - 10*log10(min_atten);
   
