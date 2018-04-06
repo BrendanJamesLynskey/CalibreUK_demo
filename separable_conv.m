@@ -7,20 +7,27 @@ close all;
 figure_num = 1;
 
 
-intrp_ratio     = 4;
-target_atten_dB = 70;
 
-% Design an LPF
-firls_order     = 28;
-mag_sband       = power(10, (target_atten_dB/-20));
-f               = [0, 0.9/intrp_ratio, 1.2/intrp_ratio, 1];
-m               = [1 1 mag_sband mag_sband];
-filt_interp     = firls(firls_order, f, m);
-filt_interp     = filt_interp ./ sum(filt_interp); % Normalise imp-response
+% If no LFP defined, design one here
+if (exist("fir_imp_resp", "var") == 0)
 
-figure(figure_num); figure_num = figure_num + 1;
-periodogram(filt_interp)
+    % Load filter spec
+    spec_filt
 
+    target_atten_dB = 70;
+
+    firls_order     = ((2*fir_ord_on2)+1) * intrp_ratio;
+    mag_sband       = power(10, (target_atten_dB/-20));
+    
+    f               = [0, 0.9/intrp_ratio, 1.2/intrp_ratio, 1];
+    m               = [1 1 mag_sband mag_sband];
+    
+    fir_imp_resp    = firls(firls_order, f, m);
+    fir_imp_resp    = fir_imp_resp ./ sum(fir_imp_resp); % Normalise imp-resp
+
+    figure(figure_num); figure_num = figure_num + 1;
+    periodogram(fir_imp_resp)
+end
 
 % Load 8b greyscale test-image
 pxl_depth       = 8;
@@ -47,13 +54,13 @@ image_double_usrc = image_double_usrc .* intrp_ratio;          % Mag scale
 % Perform vertical convolution
 mat_v_filt = [];
 for idx_col = 1:size(image_double_usrc)(2)
-    mat_v_filt = [mat_v_filt, conv(image_double_usrc(:, idx_col), filt_interp)];
+    mat_v_filt = [mat_v_filt, conv(image_double_usrc(:, idx_col), fir_imp_resp)];
 end
 
 % Perform horizontal convolution
 mat_vh_filt = [];
 for idx_row = 1:size(mat_v_filt)(1)
-    mat_vh_filt = [mat_vh_filt; conv(mat_v_filt(idx_row, :)', filt_interp)'];
+    mat_vh_filt = [mat_vh_filt; conv(mat_v_filt(idx_row, :)', fir_imp_resp)'];
 end
 
 % Convert the output to uint8
@@ -64,7 +71,5 @@ figure(figure_num); figure_num = figure_num + 1;
 imshow(mat_vh_filt_uint8)
 title('Image, scaled by my function');
 
-
- 
  
  
