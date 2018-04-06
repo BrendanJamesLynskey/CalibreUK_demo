@@ -16,14 +16,14 @@ figure_num = 1;
 
 % Specify filter:
 %
-%    order_on_2:       number of taps each side of central tap
+%    symm_filt_ord:    number of taps in symm-FIR (excluding central impulse)
 %                      higher order yields higher performance, at greater cost
 %    intrp_ratio:      desired interpolation (scaling) factor
 %                      equals number of sub-filter phases
 %    signed_coeff_wid: bit-width of FIR coefficients (2's complement)
 %                      must represent +/-1, so 2 MS bits to left of binary point
 %
-order_on_2         = 3;
+symm_filt_ord      = 3*2;
 intrp_ratio        = 4;
 %signed_coeff_wid   = 9; % Altera multipliers used efficiently with 9b IPs
 signed_coeff_wid   = 18; % Altera multipliers used fully with 18b IPs
@@ -35,7 +35,7 @@ spec_rec601
 
 % PART 1
 % Generate 1D least-squares approx filter, over-sampled for upscaling
-num_taps        = (2*order_on_2) + 1;
+num_taps        = symm_filt_ord + 1;
 num_phases      = intrp_ratio;
 
 BW_old_Fnyq     = f_presamp_40dB/(f_samp_orig/2);
@@ -63,7 +63,8 @@ end
 %w_vect=[...];
 
 
-ls_filt = firls(intrp_ratio*order_on_2,f_vect,m_vect);
+ls_filt = firls(intrp_ratio*symm_filt_ord,f_vect,m_vect);
+
 % Use following command to ensure that impulse response is symmetric
 %ls_filt = (ls_filt+fliplr(ls_filt))/2;
  
@@ -80,18 +81,10 @@ periodogram(ls_filt')
 
 % PART 2
 % Generate polyphase coefficients for LS approx anti-imaging filter
-
-% Zero-pad taps to power-of-two, including central impulse
-%num_taps        = num_taps + 1;
-
 fir_poly        = zeros(num_phases, num_taps);
 
-%zeropad_pow2    = ceil(log2(length(ls_filt)));
-%ls_filt_zpadlen = pow2(zeropad_pow2) - length(ls_filt);
-%ls_filt_zpad    = [ls_filt', zeros(1, ls_filt_zpadlen)];
-
-%ls_filt_zpad    = [ls_filt', zeros(1, num_phases-1)];
-ls_filt_zpad    = ls_filt';
+% Zero-pad impulse response so can make equal length sub-filters
+ls_filt_zpad    = [ls_filt', zeros(1, num_phases-1)];
 
 for idx_phs = 1:num_phases
     sub_filter = downsample(ls_filt_zpad, num_phases, idx_phs-1)';

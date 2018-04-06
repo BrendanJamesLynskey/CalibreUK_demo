@@ -48,5 +48,5 @@ atten_trans_end_dB = 40;
 atten_trans_end_dB = atten_trans_end_dB + 3;
 
 % Add factor for number of images which will fold-down
-atten_trans_end_dB = atten_trans_end_dB + log10(intrp_ratio-1);
+atten_trans_end_dB = atten_trans_end_dB + 10*log10(intrp_ratio-1);
 
