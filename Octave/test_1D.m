@@ -11,7 +11,6 @@ ip_sig = [ones(1,ip_len/4), zeros(1,ip_len/4), ones(1,ip_len/4), zeros(1,ip_len/
 
 % Calculate output of each phase
 % Plot input signal, and results of simple filtering (sanity check)
-
 figure(figure_num); figure_num = figure_num + 1;
 
 fig_xaxis        = [0:(ip_len-1)];

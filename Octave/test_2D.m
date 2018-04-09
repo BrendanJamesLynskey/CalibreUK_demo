@@ -24,7 +24,7 @@ if (exist("fir_imp_resp", "var") == 0)
     
     fir_imp_resp    = firls(firls_order, f, m);
     fir_imp_resp    = fir_imp_resp ./ sum(fir_imp_resp); % Normalise imp-resp
-bjl
+
     figure(figure_num); figure_num = figure_num + 1;
     periodogram(fir_imp_resp)
 
