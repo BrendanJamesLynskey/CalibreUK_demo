@@ -35,7 +35,6 @@ end
 
 
 % Generate least-squares approx filter
-
 %
 if (enable_gen_least_sq_approx_filter == 1)
     % Setup
