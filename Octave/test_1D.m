@@ -20,6 +20,7 @@ subplot(((num_phases/2)+1),2,1);
 plot(fig_xaxis, ip_sig);
 axis([0, (ip_len-1), -0.5, 1.5]);
 
+
 phase_op_len     = ip_len + (num_taps-1);
 op_phase         = zeros(num_phases, phase_op_len);
 
@@ -57,3 +58,4 @@ axis([0, (ip_len-1), -0.5, 1.5]);
 subplot(2,1,2);
 plt_xaxis        = [0:(length(op_upsc)-1)];
 plot(plt_xaxis, op_upsc);
+

@@ -43,6 +43,7 @@ figure(figure_num); figure_num = figure_num + 1;
 imshow(imresize(image, intrp_ratio))
 title('Image, scaled by Octave function');
 
+
 % Convert the output to doubles
 image_double    = cast(image, 'double') ./ power(2, pxl_depth);
 
@@ -71,6 +72,5 @@ mat_vh_filt_uint8 = cast(mat_vh_filt .* power(2, pxl_depth), 'uint8');
 figure(figure_num); figure_num = figure_num + 1;
 imshow(mat_vh_filt_uint8)
 title(sprintf('%s%s', 'Image, scaled by ', filter_name));
-
  
  

@@ -2,11 +2,6 @@
 % Brendan Lynskey 2018
 %
 
-
-clear all
-close all
-figure_num = 1;
-
 % Least-squares filter:
 %  This is just an FIR filter designed via the Octave firls() function
 %  From the help:
@@ -15,16 +10,7 @@ figure_num = 1;
 %     squared error in the specified bands is minimized.
 % This is good as linear phase preserves edges
 
-filter_name = 'leastsq-approx-filter';
 
-% Load filter spec
-spec_filt
-
-% Load Rec601 signal spec
-spec_rec601
-
-
-% PART 1
 % Generate 1D least-squares approx filter, over-sampled for upscaling
 BW_old_Fnyq     = f_presamp_40dB/(f_samp_orig/2);
 BW_new_Fnyq     = BW_old_Fnyq/intrp_ratio;
@@ -62,14 +48,3 @@ stem(fir_imp_resp);
 title(filter_name);
 subplot(2,1,2);
 periodogram(fir_imp_resp)
-
-
-
-
-% PART 2
-% Generate polyphase coefficients for LS approx anti-imaging filter
-gen_polyphase
-
-% PART 3: test
-test_1D
-test_2D

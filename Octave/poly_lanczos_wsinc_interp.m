@@ -3,9 +3,6 @@
 %
 
 
-clear all
-close all
-figure_num = 1;
 
 % Windowed sinc filter:
 % Sinc good as a filter as symmetric, and linear phase preserves edges
@@ -18,18 +15,10 @@ figure_num = 1;
 % Make simple odd-order FIR, which captures central lobe & extra lobes on *both* sides.
 % Odd order filter co-sites (some) output samples with the input samples
 
-filter_name = 'lanczos-winsinc-filter';
-
-% Load filter spec
-spec_filt
-
-% Load Rec601 signal spec
-spec_rec601
 
 
-% PART 1
+
 % Generate 1D windowed sinc filter (Lanczos window), over-sampled for upscaling
-%
 % 
 % Find highest filter Fcutoff for desired attenuation from f_trans_end to PI
 %     sinc_pband_scale: sinc argument scale-factor. 
@@ -102,12 +91,3 @@ title('windowed sinc');
 subplot(2,2,4);
 periodogram(fir_imp_resp')
 
-
-
-% PART 2
-% Generate polyphase coefficients for Lanczos anti-imaging filter
-gen_polyphase
-
-% PART 3: test
-test_1D
-test_2D
