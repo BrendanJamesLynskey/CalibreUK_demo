@@ -78,7 +78,7 @@ end
 
  
 % Plot sinc, window, windowed-sinc and its PSD
-figure(figure_num); figure_num = figure_num + 1;
+new_figure;
 subplot(2,2,1);
 plot(idx_sinc, sinc_func);
 title('sinc');

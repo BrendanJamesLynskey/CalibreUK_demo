@@ -42,7 +42,7 @@ fir_imp_resp  = firls(intrp_ratio*fir_ord_on2*2,f_vect,m_vect)';
 %ls_filt = (ls_filt+fliplr(ls_filt))/2;
  
 % Plot filter and its PSD
-figure(figure_num); figure_num = figure_num + 1;
+new_figure;
 subplot(2,1,1);
 stem(fir_imp_resp);
 title(filter_name);

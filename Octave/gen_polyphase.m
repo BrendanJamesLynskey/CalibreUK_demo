@@ -23,7 +23,7 @@ for idx_phs = 1:num_phases
 end
 
 % Plot PSD of each phase. Check that all have low-pass spectrum!
-figure(figure_num); figure_num = figure_num + 1;
+new_figure;
 
 subplot_num = 1;
 for phase = 1 : num_phases

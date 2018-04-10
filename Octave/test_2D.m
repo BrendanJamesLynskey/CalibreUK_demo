@@ -25,7 +25,7 @@ if (exist("fir_imp_resp", "var") == 0)
     fir_imp_resp    = firls(firls_order, f, m);
     fir_imp_resp    = fir_imp_resp ./ sum(fir_imp_resp); % Normalise imp-resp
 
-    figure(figure_num); figure_num = figure_num + 1;
+    new_figure;
     periodogram(fir_imp_resp)
 
 end
@@ -34,13 +34,13 @@ end
 pxl_depth       = 8;
 image           = imread('lenna_256x256.bmp');
 
-figure(figure_num); figure_num = figure_num + 1;
+new_figure;
 imshow(image)
 title('Original image');
 
 
 % Resize using Octave function
-figure(figure_num); figure_num = figure_num + 1;
+new_figure;
 imshow(imresize(image, intrp_ratio))
 title('Image, scaled by Octave function');
 
@@ -70,7 +70,7 @@ end
 mat_vh_filt_uint8 = cast(mat_vh_filt .* power(2, pxl_depth), 'uint8');
 
 % Display the result, warts and all!
-figure(figure_num); figure_num = figure_num + 1;
+new_figure;
 imshow(mat_vh_filt_uint8)
 title(sprintf('%s%s', 'Image, scaled by ', filter_name));
 
