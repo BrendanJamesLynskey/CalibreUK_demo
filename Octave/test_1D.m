@@ -11,7 +11,7 @@ ip_sig = [ones(1,ip_len/4), zeros(1,ip_len/4), ones(1,ip_len/4), zeros(1,ip_len/
 
 % Calculate output of each phase
 % Plot input signal, and results of simple filtering (sanity check)
-new_figure;
+figure(figure_num); figure_num = figure_num + 1;
 
 fig_xaxis        = [0:(ip_len-1)];
 
@@ -29,7 +29,7 @@ for phase = 1:num_phases
     plot(fig_xaxis, op_phase(phase, 1:ip_len));
     axis([0, (ip_len-1), -0.5, 1.5]);
 end
-
+print test_1D_phases.pdf
 
 % Create upscaled output, by commutating between phases
 op_upsc          = zeros(1, num_phases * ip_len);
@@ -47,7 +47,7 @@ for idx_upsc = 1: length(op_upsc)
 end
 
 % Plot the input and output signals. NB group-delay and x-axis scale
-new_figure;
+figure(figure_num); figure_num = figure_num + 1;
 
 subplot(2,1,1);
 plt_xaxis        = [0:(ip_len-1)];
@@ -57,4 +57,4 @@ axis([0, (ip_len-1), -0.5, 1.5]);
 subplot(2,1,2);
 plt_xaxis        = [0:(length(op_upsc)-1)];
 plot(plt_xaxis, op_upsc);
-
+print test_1D_upscaled.pdf

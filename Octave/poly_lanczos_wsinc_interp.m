@@ -78,7 +78,7 @@ end
 
  
 % Plot sinc, window, windowed-sinc and its PSD
-new_figure;
+figure(figure_num); figure_num = figure_num + 1;
 subplot(2,2,1);
 plot(idx_sinc, sinc_func);
 title('sinc');
@@ -90,4 +90,4 @@ plot(idx_sinc, fir_imp_resp);
 title('windowed sinc');
 subplot(2,2,4);
 periodogram(fir_imp_resp')
-
+print base_filter.pdf

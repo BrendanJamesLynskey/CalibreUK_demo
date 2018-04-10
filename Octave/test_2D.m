@@ -2,9 +2,6 @@
 % Brendan Lynskey 2018
 
 
-%clear all;
-%close all;
-
 
 
 % If no LFP defined, design one here
@@ -25,7 +22,7 @@ if (exist("fir_imp_resp", "var") == 0)
     fir_imp_resp    = firls(firls_order, f, m);
     fir_imp_resp    = fir_imp_resp ./ sum(fir_imp_resp); % Normalise imp-resp
 
-    new_figure;
+    figure(figure_num); figure_num = figure_num + 1;
     periodogram(fir_imp_resp)
 
 end
@@ -34,16 +31,16 @@ end
 pxl_depth       = 8;
 image           = imread('lenna_256x256.bmp');
 
-new_figure;
+figure(figure_num); figure_num = figure_num + 1;
 imshow(image)
 title('Original image');
-
+print test_2D_original.pdf
 
 % Resize using Octave function
-new_figure;
+figure(figure_num); figure_num = figure_num + 1;
 imshow(imresize(image, intrp_ratio))
 title('Image, scaled by Octave function');
-
+print test_2D_octave_processed.pdf
 
 % Convert the output to doubles
 image_double    = cast(image, 'double') ./ power(2, pxl_depth);
@@ -70,9 +67,8 @@ end
 mat_vh_filt_uint8 = cast(mat_vh_filt .* power(2, pxl_depth), 'uint8');
 
 % Display the result, warts and all!
-new_figure;
+figure(figure_num); figure_num = figure_num + 1;
 imshow(mat_vh_filt_uint8)
 title(sprintf('%s%s', 'Image, scaled by ', filter_name));
+print test_2D_custom_processed.pdf
 
-
- 

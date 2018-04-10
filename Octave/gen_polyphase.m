@@ -23,7 +23,7 @@ for idx_phs = 1:num_phases
 end
 
 % Plot PSD of each phase. Check that all have low-pass spectrum!
-new_figure;
+figure(figure_num); figure_num = figure_num + 1;
 
 subplot_num = 1;
 for phase = 1 : num_phases
@@ -35,6 +35,7 @@ for phase = 1 : num_phases
     subplot_num = subplot_num + 1;
     periodogram(fir_poly(phase, :)');
 end
+print polyphase_filter.pdf
 
 % Save coefficients in file
 filename_coeffs = sprintf('%s%s', filter_name, '_poly_coeffs.txt');

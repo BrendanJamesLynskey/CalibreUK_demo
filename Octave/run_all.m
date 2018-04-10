@@ -5,8 +5,8 @@ pkg load image
 clear all
 close all
 
-enable_gen_lanczos_winsinc_filter = 1;
-enable_gen_least_sq_approx_filter = 0;
+enable_gen_lanczos_winsinc_filter = 0;
+enable_gen_least_sq_approx_filter = 1;
 
 
 % Generate Lanczos windowed-sinc filter
@@ -54,3 +54,4 @@ if (enable_gen_least_sq_approx_filter == 1)
     test_1D
     test_2D
 end
+
