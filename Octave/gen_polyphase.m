@@ -25,9 +25,11 @@ end
 
 % Check symmetry
 %    Asymmetric phases will destroy symmetry in image detail
+%    Also good to have symmetry, as enables HW savings
+%
 %    First and central phases: no symmetric filter, but symmetric about own centre
 %    Other phases: phase(P) is reversed version of phase(L-P)
-%    Ignore final sample in all but first phase, as always 0
+%    Ignore final sample in all but first phase, as always 0 (dropped in HW?)
 
 % First phase
 idx_phase = 1;
