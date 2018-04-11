@@ -90,4 +90,6 @@ plot(idx_sinc, fir_imp_resp);
 title('windowed sinc');
 subplot(2,2,4);
 periodogram(fir_imp_resp')
-print base_filter.pdf
+if (en_write_plot_pdf == 1)
+    print base_filter.pdf
+end

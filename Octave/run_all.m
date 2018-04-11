@@ -5,15 +5,17 @@ pkg load image
 clear all
 close all
 
-enable_gen_lanczos_winsinc_filter = 0;
-enable_gen_least_sq_approx_filter = 1;
+gen_lanczos_winsinc_filter = 1;
+gen_least_sq_approx_filter = 0;
+
+en_write_plot_pdf          = 0;
 
 
 % Generate Lanczos windowed-sinc filter
 %
-if (enable_gen_lanczos_winsinc_filter == 1)
+if (gen_lanczos_winsinc_filter == 1)
     % Setup
-    keep enable_gen_lanczos_winsinc_filter enable_gen_least_sq_approx_filter;
+    keep gen_lanczos_winsinc_filter gen_least_sq_approx_filter en_write_plot_pdf;
     close all
     figure_num = 1;
     % Load filter spec
@@ -36,9 +38,9 @@ end
 
 % Generate least-squares approx filter
 %
-if (enable_gen_least_sq_approx_filter == 1)
+if (gen_least_sq_approx_filter == 1)
     % Setup
-    keep enable_gen_lanczos_winsinc_filter enable_gen_least_sq_approx_filter;
+    keep gen_lanczos_winsinc_filter gen_least_sq_approx_filter en_write_plot_pdf;
     close all
     figure_num = 1;
     % Load filter spec

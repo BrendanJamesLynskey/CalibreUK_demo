@@ -48,4 +48,6 @@ stem(fir_imp_resp);
 title(filter_name);
 subplot(2,1,2);
 periodogram(fir_imp_resp)
-print base_filter.pdf
+if (en_write_plot_pdf == 1)
+    print base_filter.pdf
+end

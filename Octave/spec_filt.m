@@ -14,7 +14,7 @@
 
 fir_ord_on2        = 3;
 
-intrp_ratio        = 2;
+intrp_ratio        = 4;
 
 %signed_coeff_wid   = 9; % Altera multipliers used efficiently with 9b IPs
 signed_coeff_wid   = 18; % Altera multipliers used fully with 18b IPs

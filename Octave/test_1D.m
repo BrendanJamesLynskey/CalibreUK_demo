@@ -29,7 +29,9 @@ for phase = 1:num_phases
     plot(fig_xaxis, op_phase(phase, 1:ip_len));
     axis([0, (ip_len-1), -0.5, 1.5]);
 end
-print test_1D_phases.pdf
+if (en_write_plot_pdf == 1)
+    print test_1D_phases.pdf
+end
 
 % Create upscaled output, by commutating between phases
 op_upsc          = zeros(1, num_phases * ip_len);
@@ -57,4 +59,7 @@ axis([0, (ip_len-1), -0.5, 1.5]);
 subplot(2,1,2);
 plt_xaxis        = [0:(length(op_upsc)-1)];
 plot(plt_xaxis, op_upsc);
-print test_1D_upscaled.pdf
+if (en_write_plot_pdf == 1)
+    print test_1D_upscaled.pdf
+end
+

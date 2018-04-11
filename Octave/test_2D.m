@@ -34,13 +34,17 @@ image           = imread('lenna_256x256.bmp');
 figure(figure_num); figure_num = figure_num + 1;
 imshow(image)
 title('Original image');
-print test_2D_original.pdf
+if (en_write_plot_pdf == 1)
+    print test_2D_original.pdf
+end
 
 % Resize using Octave function
 figure(figure_num); figure_num = figure_num + 1;
 imshow(imresize(image, intrp_ratio))
 title('Image, scaled by Octave function');
-print test_2D_octave_processed.pdf
+if (en_write_plot_pdf == 1)
+    print test_2D_octave_processed.pdf
+end
 
 % Convert the output to doubles
 image_double    = cast(image, 'double') ./ power(2, pxl_depth);
@@ -70,5 +74,8 @@ mat_vh_filt_uint8 = cast(mat_vh_filt .* power(2, pxl_depth), 'uint8');
 figure(figure_num); figure_num = figure_num + 1;
 imshow(mat_vh_filt_uint8)
 title(sprintf('%s%s', 'Image, scaled by ', filter_name));
-print test_2D_custom_processed.pdf
+if (en_write_plot_pdf == 1)
+    print test_2D_custom_processed.pdf
+end
+
 
