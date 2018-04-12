@@ -7,14 +7,21 @@
 % If no LFP defined, design one here
 if (exist("fir_imp_resp", "var") == 0)
 
+    clear all;
+    close all;
     printf('No filter defined, so generating new LPF\n')
     figure_num = 1;
+    en_write_plot_pdf = 0;
 
     % Load filter spec
     spec_filt
+    % Load Rec601 signal spec
+    spec_rec601
+    
+    filter_name     = 'quick-firls-filter';
 
     firls_order     = 2 * fir_ord_on2 * intrp_ratio;
-    mag_sband       = power(10, (target_atten_dB/-20));
+    mag_sband       = power(10, (atten_trans_end_dB/-20));
     
     f               = [0, 0.9/intrp_ratio, 1.2/intrp_ratio, 1];
     m               = [1 1 mag_sband mag_sband];
