@@ -78,6 +78,7 @@ end
 mat_vh_filt_uint8 = cast(mat_vh_filt .* power(2, pxl_depth), 'uint8');
 
 % Display the result, warts and all!
+% No attempt to deal with borders
 figure(figure_num); figure_num = figure_num + 1;
 imshow(mat_vh_filt_uint8)
 title(sprintf('%s%s', 'Image, scaled by ', filter_name));

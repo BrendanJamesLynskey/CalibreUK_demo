@@ -1,14 +1,15 @@
 % Calibre UK video scaling demo
-pkg load signal
-pkg load image
+% Brendan Lynskey 2018
+
+setup_octave
 
 clear all
 close all
 
-gen_lanczos_winsinc_filter = 1;
-gen_least_sq_approx_filter = 0;
-
 en_write_plot_pdf          = 0;
+
+gen_lanczos_winsinc_filter = 0;
+gen_least_sq_approx_filter = 1;
 
 
 % Generate Lanczos windowed-sinc filter

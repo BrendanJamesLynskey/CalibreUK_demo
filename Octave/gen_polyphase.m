@@ -16,6 +16,7 @@ else
     zpad_wsinc_func = [zpad_pre, fir_imp_resp, zpad_pst];
 end
 
+% Decomposition
 for idx_phs = 1:num_phases
     % Extract sub-filter for this phase
     fir_poly(idx_phs, :) = num_phases * downsample(zpad_wsinc_func, intrp_ratio, idx_phs-1);
@@ -34,39 +35,44 @@ end
 %    Asymmetric phases will destroy symmetry in image detail
 %    Also good to have symmetry, as enables HW savings
 %
-%    First and central phases: no symmetric filter, but symmetric about own centre
-%    Other phases: phase(P) is reversed version of phase(L-P)
-%    Ignore final sample in all but first phase, as always 0 (dropped in HW?)
+% TO-DO: add case of non cosited 1st sample
 
-% First phase
-idx_phase = 1;
-for idx_samp = 1:num_taps/2
-    sampA = fir_poly(idx_phase, idx_samp);
-    sampB = fir_poly(idx_phase, num_taps-idx_samp+1);
-    if (sampA != sampB)
-        printf("Asymmetric primary phase!\n")
-  end
-end
-
-% Central phase
-idx_phase = (num_phases/2)+1;
-for idx_samp = 1:num_taps/2
-    sampA = fir_poly(idx_phase, idx_samp);
-    sampB = fir_poly(idx_phase, num_taps-idx_samp);
-    if (sampA != sampB)
-        printf("Asymmetric central phase!\n")
-    end
-end
-
-% Other phases
-for idx_phase = 2:intrp_ratio/2
+if (cosite_op1_at_ip == 1)
+    % Co-sited first sample
+    %    First and central phases: no symmetric filter, but symmetric about own centre
+    %    Other phases: phase(P) is reversed version of phase(L-P)
+    %    Ignore final sample in all but first phase, as always 0 (dropped in HW?)
+    % First phase
+    idx_phase = 1;
     for idx_samp = 1:num_taps/2
         sampA = fir_poly(idx_phase, idx_samp);
-        sampB = fir_poly(num_phases-(idx_phase-2), num_taps-idx_samp);
+        sampB = fir_poly(idx_phase, num_taps-idx_samp+1);
         if (sampA != sampB)
-          printf("Asymmetric phase!\n")
+            printf("Asymmetric primary phase!\n")
       end
     end
+    % Central phase
+    idx_phase = (num_phases/2)+1;
+    for idx_samp = 1:num_taps/2
+        sampA = fir_poly(idx_phase, idx_samp);
+        sampB = fir_poly(idx_phase, num_taps-idx_samp);
+        if (sampA != sampB)
+            printf("Asymmetric central phase!\n")
+        end
+    end
+    % Other phases
+    for idx_phase = 2:intrp_ratio/2
+        for idx_samp = 1:num_taps/2
+            sampA = fir_poly(idx_phase, idx_samp);
+            sampB = fir_poly(num_phases-(idx_phase-2), num_taps-idx_samp);
+            if (sampA != sampB)
+              printf("Asymmetric phase!\n")
+          end
+        end
+    end
+else
+    % To-do for non cosited 1st sample
+    %fir_poly
 end
 
 
