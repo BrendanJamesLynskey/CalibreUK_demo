@@ -12,9 +12,15 @@
 %                      must represent +/-1, so 2 MS bits to left of binary point
 %
 
-fir_ord_on2        = 3;
+fir_ord_on2         = 3;
 
-intrp_ratio        = 4;
+%intrp_ratio         = 2;
+intrp_ratio         = 4;
 
-%signed_coeff_wid   = 9; % Altera multipliers used efficiently with 9b IPs
-signed_coeff_wid   = 18; % Altera multipliers used fully with 18b IPs
+%signed_coeff_wid    = 9; % Altera multipliers used efficiently with 9b IPs
+signed_coeff_wid    = 18; % Altera multipliers used fully with 18b IPs
+
+% Two options wrt location of first OP-sample:
+%   1) co-sited with central central IP-sample
+%   2) sited 1/2 an OP-sample before  central central IP-sample
+cosite_op1_at_ip    = 1;

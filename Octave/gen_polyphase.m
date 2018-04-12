@@ -7,7 +7,14 @@ num_phases      = intrp_ratio;
 fir_poly        = zeros(num_phases, num_taps);
 
 % Zero-pad impulse response so can make equal length sub-filters
-zpad_wsinc_func = [fir_imp_resp, zeros(1, num_phases-1)];
+if (cosite_op1_at_ip == 1)
+    zpad            = zeros(1, num_phases-1);
+    zpad_wsinc_func = [fir_imp_resp, zpad]; 
+else
+    zpad_pre        = zeros(1, num_phases/2);
+    zpad_pst        = zeros(1, (num_phases/2)-1);
+    zpad_wsinc_func = [zpad_pre, fir_imp_resp, zpad_pst];
+end
 
 for idx_phs = 1:num_phases
     % Extract sub-filter for this phase
