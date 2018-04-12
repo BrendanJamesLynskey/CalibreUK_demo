@@ -29,7 +29,11 @@
 
 lanczos_order = fir_ord_on2;
 
-for sinc_pband_scale = 1.0:-0.001: 0.01
+search_max      = 1.00;
+search_min      = 0.01;
+found_good_filt = 0;
+
+for sinc_pband_scale = search_max:-0.001: search_min
 
   % Generate normalised sinc filter
   %
@@ -53,9 +57,12 @@ for sinc_pband_scale = 1.0:-0.001: 0.01
   %       and they become smaller in magnitude at higher frequencies
   min_atten       = max(Pxx(bin_trans_end:end));
   rel_atten_dB    = 10* log10(Pxx(1)) - 10*log10(min_atten);
-  
+   
   if (rel_atten_dB >= atten_trans_end_dB)
   
+      printf('\n\n\t\tFilter search found solution!!\n\n\n');
+      found_good_filt = 1;
+   
       % The spec is met if difference between DC attenuation, and
       % attenuation at f_trans_end/intrp_ratio is > required attenuation 
       printf('Check relative atten at new Fnyq * %f\n', (f_trans_end/intrp_ratio))
@@ -65,7 +72,7 @@ for sinc_pband_scale = 1.0:-0.001: 0.01
       
       printf('Actual relative attenuation (min, in dB):\n')
       rel_atten_dB
-      
+           
       % Normalise imp-response magnitude
       fir_imp_resp /= sum(fir_imp_resp);
   
@@ -74,6 +81,10 @@ for sinc_pband_scale = 1.0:-0.001: 0.01
 
 end
 
+% If hit end-stop without finding good filter, alert user
+if (found_good_filt == 0)
+  printf('\n\n\t\tFilter search hit the end-stop, use more taps!!\n');
+end
 
 
  

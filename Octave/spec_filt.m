@@ -12,7 +12,9 @@
 %                      must represent +/-1, so 2 MS bits to left of binary point
 %
 
-fir_ord_on2         = 3;
+%fir_ord_on2         = 2;   % Lanczos2 fails to meet attenuation spec.
+                            % firls() produces bad filter
+fir_ord_on2         = 3;    % Both filters good at this spec
 
 %intrp_ratio         = 2;
 intrp_ratio         = 4;
