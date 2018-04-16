@@ -8,3 +8,12 @@ Tested on Ubuntu 16.0.4.
 
 Execute 'octave run_all.m' to produce results.
 
+
+***VHDL_example dir***
+
+This is the VHDL code from my MSc, completed many years ago!!
+
+Russ: the password is your surname (all lower case).
+
+
+
